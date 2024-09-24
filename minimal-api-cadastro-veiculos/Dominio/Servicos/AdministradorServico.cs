@@ -5,7 +5,6 @@ using minimal_api_cadastro_veiculos.Infraestrura.Db;
 
 namespace minimal_api_cadastro_veiculos.Dominio.Servicos;
 
-
 public class AdministradorServico : IAdministradorServico
 {
     private readonly DbContexto _contexto;
