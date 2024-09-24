@@ -60,6 +60,15 @@ app.MapGet("/veiculos", ([FromQuery] int? pagina, IVeiculoServico veiculoServico
 
     return Results.Ok(veiculos);
 }).WithTags("Veiculos");
+
+app.MapGet("/veiculos/{id}", ([FromRoute] int id, IVeiculoServico veiculoServico) => {
+    
+    var veiculo = veiculoServico.BuscaPorId(id);
+
+    if(veiculo == null) return Results.NotFound("Veiculo não cadastrado!");
+
+    return Results.Ok(veiculo);
+}).WithTags("Veiculos");
 #endregion
 
 app.UseSwagger();
