@@ -41,8 +41,34 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministra
 #endregion
 
 #region Veiculos
-app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => {
+
+ErrosDeValidacao validarDTO(VeiculoDTO veiculoDTO)
+{
     
+    var validacao = new ErrosDeValidacao{
+        Mensagens = new List<string>()
+    };
+
+    if(string.IsNullOrEmpty(veiculoDTO.Nome))
+        validacao.Mensagens.Add("O nome do veículo precisa ser informado");
+
+    if(string.IsNullOrEmpty(veiculoDTO.Marca))
+        validacao.Mensagens.Add("A marca do veículo precisa ser informada");
+
+    if(veiculoDTO == null)
+        validacao.Mensagens.Add("O ano do veículo precisa ser cadastrado");
+
+    return validacao;
+
+}
+
+app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => {
+
+
+    var validacao = validarDTO(veiculoDTO);
+    if(validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
+
     var veiculo = new Veiculo{
         Nome = veiculoDTO.Nome,
         Marca = veiculoDTO.Marca,
@@ -73,8 +99,12 @@ app.MapGet("/veiculos/{id}", ([FromRoute] int id, IVeiculoServico veiculoServico
 app.MapPut("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => {
     
     var veiculo = veiculoServico.BuscaPorId(id);
-
     if(veiculo == null) return Results.NotFound("Veiculo não cadastrado!");
+
+
+    var validacao = validarDTO(veiculoDTO);
+    if(validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
 
     veiculo.Nome = veiculoDTO.Nome;
     veiculo.Marca = veiculoDTO.Marca;
