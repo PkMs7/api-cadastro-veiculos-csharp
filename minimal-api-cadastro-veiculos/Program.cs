@@ -64,12 +64,29 @@ app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, I
 
     administradorServico.Incluir(administrador);
 
-    return Results.Created($"/veiculo/{administrador.id}", administrador);
+    return Results.Created($"/administrador/{administrador.id}", administrador);
 }).WithTags("Administradores");
+
+app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) => {
+    
+    var administradores = administradorServico.Todos(pagina);
+
+    return Results.Ok(administradores);
+}).WithTags("Administradores");
+
+app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) => {
+    
+    var administrador = administradorServico.BuscaPorId(id);
+
+    if(administrador == null) return Results.NotFound("Administrador não cadastrado!");
+
+    return Results.Ok(administrador);
+}).WithTags("Administradores");
+
+
 #endregion
 
 #region Veiculos
-
 ErrosDeValidacao validarDTO(VeiculoDTO veiculoDTO)
 {
     
