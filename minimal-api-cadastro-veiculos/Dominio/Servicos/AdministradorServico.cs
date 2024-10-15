@@ -17,4 +17,10 @@ public class AdministradorServico : IAdministradorServico
         var adm = _contexto.Administradores.Where(a => a.Email == loginDTO.Email && a.Senha == loginDTO.Senha).FirstOrDefault();
         return adm;
     }
+
+    public void Incluir(Administrador administrador)
+    {
+        _contexto.Administradores.Add(administrador);
+        _contexto.SaveChanges();
+    }
 }
