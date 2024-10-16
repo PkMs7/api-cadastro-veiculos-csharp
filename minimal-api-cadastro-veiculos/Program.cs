@@ -1,5 +1,8 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using minimal_api_cadastro_veiculos.Dominio.DTOs;
 using minimal_api_cadastro_veiculos.Dominio.Entidades;
 using minimal_api_cadastro_veiculos.Dominio.Interfaces;
@@ -9,6 +12,21 @@ using minimal_api_cadastro_veiculos.Infraestrura.Db;
 
 #region Builder
 var builder = WebApplication.CreateBuilder(args);
+
+var key = builder.Configuration.GetSection("Jwt").ToString();
+if(string.IsNullOrEmpty(key)) key = "123456";
+
+builder.Services.AddAuthentication(option => {
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(option => {
+    option.TokenValidationParameters = new TokenValidationParameters{
+        ValidateLifetime = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
 builder.Services.AddScoped<IVeiculoServico, VeiculoServico>();
@@ -82,8 +100,6 @@ app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico a
 
     return Results.Ok(administrador);
 }).WithTags("Administradores");
-
-
 #endregion
 
 #region Veiculos
@@ -174,6 +190,9 @@ app.MapDelete("/veiculos/{id}", ([FromRoute] int id, IVeiculoServico veiculoServ
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 #endregion
